@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AlignAI - Perfect Your Form</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Add this if not already in your CSS */
+    .bg-video {
+      position: fixed;
+      top: 0; left: 0;
+      min-width: 100vw; min-height: 100vh;
+      width: 100vw; height: 100vh;
+      z-index: -1;
+      object-fit: cover;
+      opacity: 0.24; /* adjust for visibility and text legibility */
+      pointer-events: none;
+      /* add blur if you want: filter: blur(2px); */
+    }
+    .main-content {
+      position: relative;
+      z-index: 1;
+    }
+    body, html {
+      height: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background: #051221; /* fallback */
+    }
+  </style>
+</head>
+<body>
+  <!-- Background video element -->
+  <video class="bg-video" autoplay muted loop playsinline>
+    <source src="run_video.mp4" type="video/mp4">
+
+  </video>
+  <div class="video-overlay"></div> 
+
+  <div class="navbar">
+      <div class="logo">AlignAI</div>
+      <ul class="nav-links">
+          <li><a href="index.html" class="active">Home</a></li>
+          <li><a href="features.html">Features</a></li>
+          <li><a href="exercises.html">Exercises</a></li>
+          <li><a href="detection.html">Detection</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="about.html">About</a></li>
+      </ul>
+  </div>
+  <div class="main-content">
+      <h1>Perfect Your Form.<br>Train Smarter with AI.</h1>
+      <p class="subtitle">
+          AlignAI analyzes your posture in real time using advanced biomechanics and AI pose detection.
+      </p>
+      <div class="buttons">
+            <a href="detection.html" class="start-btn">Start Training</a>
+      </div>
+      <div class="runner-bg"
+      
+      ></div>
+  </div>
+  <script src="script-home.js"></script>
+</body>
+</html>

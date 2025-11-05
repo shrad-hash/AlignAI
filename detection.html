@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AlignAI Pose Detection</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
+</head>
+<body class="detection-page">
+    <div class="navbar">
+        <div class="logo">AlignAI</div>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="features.html">Features</a></li>
+          <li><a href="exercises.html">Exercises</a></li>
+          <li><a href="detection.html" class="active">Detection</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+    </div>
+    <main class="main-detection">
+      <div class="main-title">
+          <h1>AI Pose Detection</h1>
+          <p class="desc">Real-time posture analysis powered by advanced computer vision</p>
+      </div>
+      <div class="detection-mainbox">
+        <div class="dashboard">
+          <div class="left-panel">
+            <div class="exercise-box bordered-card">
+              <span class="panel-title">Select Exercise</span>
+              <div class="exercise-options">
+                <button onclick="selectExercise(this,'Squat')">
+                  <svg width="22" height="22" fill="none" stroke="#24e6ea" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <circle cx="12" cy="4" r="2"/>
+                    <path d="M12 6v6"/>
+                    <path d="M12 12l-3.5 4"/>
+                    <path d="M12 12l3.5 4"/>
+                    <path d="M10 20v-4h4v4"/>
+                  </svg>Squat
+                </button>
+                <button onclick="selectExercise(this,'Shoulder Press')">
+                  <svg width="22" height="22" fill="none" stroke="#24e6ea" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <rect x="2" y="9" width="4" height="6" rx="1"/>
+                    <rect x="18" y="9" width="4" height="6" rx="1"/>
+                    <path d="M6 12h12"/>
+                  </svg>Shoulder Press
+                </button>
+                <button onclick="selectExercise(this,'Bicep Curl')">
+                  <svg width="22" height="22" fill="none" stroke="#24e6ea" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M13 18l-3-7 3-7"/>
+                    <path d="M20 12a8 8 0 01-16 0"/>
+                    <path d="M4 12h16"/>
+                  </svg>Bicep Curl
+                </button>
+                <button onclick="selectExercise(this,'Plank')">
+                  <svg width="22" height="22" fill="none" stroke="#24e6ea" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <circle cx="5" cy="17" r="2"/>
+                    <rect x="7" y="15.5" width="10" height="3" rx="1.5"/>
+                    <circle cx="19" cy="17" r="2"/>
+                  </svg>Plank
+                </button>
+              </div>
+            </div>
+            <div class="camera-box bordered-card">
+              <div id="camera-container">
+                <video id="webcam" autoplay playsinline></video>
+                <canvas id="output"></canvas>
+              </div>
+              <div id="comingSoon" style="margin-top:40px;">
+                <h2>Get Started!</h2>
+                <p>
+                  Select an exercise and allow camera access to begin.<br>
+                  Your posture analysis will appear here.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="right-panel bordered-card">
+            <div class="info-box">
+              <span class="panel-title">How To Setup</span>
+              <div id="setup-steps"></div>
+              <div id="pre-instructions" style="margin-top:20px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="script-detection.js"></script>
+    <audio id="beep-audio" src="beep-329314.mp3" preload="auto"></audio>
+</body>
+</html>

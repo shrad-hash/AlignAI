@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>AlignAI - USC Research-Based Squat Form</title>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.20.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection/dist/movenet.js"></script>
+<style>
+  body {
+    margin: 0; background: #111; color: white;
+    font-family: Poppins, sans-serif;
+    display: flex; justify-content: center;
+    min-height: 100vh; align-items: flex-start;
+    padding: 20px;
+  }
+  .container {
+    display: flex;
+    max-width: 1280px;
+    width: 100%;
+    gap: 30px;
+  }
+  .video-section {
+    position: relative;
+    width: 640px;
+    min-width: 640px;
+  }
+  #video, #canvas {
+    border-radius: 12px;
+    transform: scaleX(-1);
+    display: block;
+  }
+  #canvas {
+    position: absolute;
+    top: 0; left: 0;
+    pointer-events: none;
+  }
+  .info-section {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 600px;
+  }
+  h1 {
+    margin-top: 0;
+    color: #00bfff;
+    text-align: left;
+  }
+  .controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+  }
+  select, button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  button {
+    background: #00bfff;
+    color: white;
+  }
+  button:hover {
+    background: #0088cc;
+  }
+  #countdown {
+    font-size: 48px;
+    color: yellow;
+    text-align: center;
+    height: 60px;
+  }
+  .instructions, .feedback, .setup-instructions {
+    background: #222;
+    padding: 15px 20px;
+    border-radius: 12px;
+    font-size: 18px;
+    line-height: 1.4;
+    white-space: pre-line;
+  }
+  .instructions {
+    color: #00bfff;
+  }
+  .feedback {
+    color: #ff4444;
+    min-height: 130px;
+    font-weight: bold;
+  }
+  .depth-indicator {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    background: rgba(0,255,0,0.8);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    pointer-events: none;
+  }
+  .angle-display {
+    position: absolute;
+    color: #ffff00;
+    font-weight: bold;
+    background: rgba(0,0,0,0.8);
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 2px solid #ffff00;
+    user-select: none;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="video-section">
+    <video id="video" width="640" height="480" autoplay playsinline></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <div class="depth-indicator" id="depthIndicator" style="display:none;"></div>
+  </div>
+  <div class="info-section">
+    <h1>🏋️ AlignAI: Squat Form Coach</h1>
+    <div class="controls">
+      <select id="exerciseSelect" disabled>
+        <option value="squat" selected>Squat (USC Biomechanics)</option>
+      </select>
+      <button id="startBtn">Start Exercise</button>
+    </div>
+    <div id="countdown"></div>
+    <div class="instructions" id="instructionText">
+      Exercise: SQUAT (USC Biomechanics Standards)
+➡ Stand sideways to camera (left side visible)
+➡ Feet 100-150% shoulder width apart, toes ~30° outward
+➡ Target: Medium depth (90-110° knee flexion)
+➡ Maintain neutral spine throughout movement
+➡ Device: Place camera at hip height ~3-5 feet from you
+    </div>
+    <div class="feedback" id="feedbackText">
+      Real-time feedback will appear here.
+    </div>
+    <div class="setup-instructions">
+      <strong>Setup Tips:</strong><br>
+      - Stand with your left side fully visible, perpendicular to camera<br>
+      - Make sure feet, hips, knees, and shoulders are in frame<br>
+      - Keep device stable, at hip height, roughly 3-5 feet away<br>
+      - Use good lighting and a clear background<br>
+      - Perform slow squats for more accurate angle detection
+    </div>
+  </div>
+</div>
+
+<script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const instructionText = document.getElementById('instructionText');
+const feedbackText = document.getElementById('feedbackText');
+const startBtn = document.getElementById('startBtn');
+const exerciseSelect = document.getElementById('exerciseSelect');
+const countdownEl = document.getElementById('countdown');
+const depthIndicator = document.getElementById('depthIndicator');
+
+let detector, running = false, lastBeepTime = 0;
+let videoStream = null;
+
+const uscSquatStandards = {
+  partialDepthMin: 0, partialDepthMax: 90,
+  mediumDepthMin: 90, mediumDepthMax: 110,
+  deepDepthMin: 110, deepDepthMax: 135,
+  optimalDepthMin: 90, optimalDepthMax: 110,
+  hipBiasAngle: 10, kneeBiasAngle: -10,
+  neutralBiasMin: -10, neutralBiasMax: 10
+};
+
+async function setupCamera() {
+  videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+  video.srcObject = videoStream;
+  await new Promise(resolve => video.onloadedmetadata = resolve);
+  return video;
+}
+
+function getAngle(a, b, c) {
+  if (!a || !b || !c || a.score < 0.5 || b.score < 0.5 || c.score < 0.5) return null;
+  const ab = [a.x - b.x, a.y - b.y];
+  const cb = [c.x - b.x, c.y - b.y];
+  const dot = ab[0] * cb[0] + ab[1] * cb[1];
+  const magA = Math.hypot(ab[0], ab[1]);
+  const magC = Math.hypot(cb[0], cb[1]);
+  if (magA === 0 || magC === 0) return null;
+  const cosine = dot / (magA * magC);
+  return Math.acos(Math.min(Math.max(cosine, -1), 1)) * (180 / Math.PI);
+}
+
+// Fixed: return knee flexion = 180° - internal angle
+function getKneeFlexionAngle(a, b, c) {
+  const internalAngle = getAngle(a, b, c);
+  if (internalAngle === null) return null;
+  return 180 - internalAngle;
+}
+
+function getTrunkTibiaAngle(shoulder, hip, knee, ankle) {
+  if (!shoulder || !hip || !knee || !ankle) return null;
+
+  const trunkVector = [hip.x - shoulder.x, hip.y - shoulder.y];
+  const tibiaVector = [ankle.x - knee.x, ankle.y - knee.y];
+
+  const angleFromVertical = (vec) => Math.atan2(vec[0], vec[1]) * (180 / Math.PI);
+
+  const trunkAngle = angleFromVertical(trunkVector);
+  const tibiaAngle = angleFromVertical(tibiaVector);
+
+  return trunkAngle - tibiaAngle;
+}
+
+function beep() {
+  const now = performance.now();
+  if (now - lastBeepTime < 1500) return;
+  lastBeepTime = now;
+  const ctxAudio = new AudioContext();
+  const osc = ctxAudio.createOscillator();
+  const gain = ctxAudio.createGain();
+  osc.connect(gain); gain.connect(ctxAudio.destination);
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(650, ctxAudio.currentTime);
+  gain.gain.setValueAtTime(0.2, ctxAudio.currentTime);
+  osc.start();
+  osc.stop(ctxAudio.currentTime + 0.2);
+}
+
+function showHint(message) {
+  feedbackText.innerHTML = message;
+}
+
+function showDepthIndicator(kneeFlexionAngle) {
+  let depthType = "";
+  let color = "";
+  if (kneeFlexionAngle >= uscSquatStandards.optimalDepthMin && kneeFlexionAngle <= uscSquatStandards.optimalDepthMax) {
+    depthType = "OPTIMAL DEPTH";
+    color = "rgba(0,255,0,0.9)";
+  } else if (kneeFlexionAngle < uscSquatStandards.optimalDepthMin) {
+    depthType = "TOO SHALLOW";
+    color = "rgba(255,165,0,0.9)";
+  } else if (kneeFlexionAngle > uscSquatStandards.optimalDepthMax && kneeFlexionAngle <= uscSquatStandards.deepDepthMax) {
+    depthType = "DEEP SQUAT";
+    color = "rgba(255,255,0,0.9)";
+  } else {
+    depthType = "TOO DEEP";
+    color = "rgba(255,0,0,0.9)";
+  }
+
+  depthIndicator.innerHTML = `${depthType}<br>${Math.round(kneeFlexionAngle)}°`;
+  depthIndicator.style.background = color;
+  depthIndicator.style.display = 'block';
+}
+
+async function init() {
+  instructionText.textContent = instructionsForSquat;
+  video.style.display = "block";
+  canvas.style.display = "block";
+
+  let count = 3;
+  countdownEl.textContent = count;
+  const interval = setInterval(() => {
+    count--;
+    countdownEl.textContent = count > 0 ? count : "Start Squatting!";
+    if (count <= 0) {
+      clearInterval(interval);
+      countdownEl.textContent = "";
+      startDetection();
+    }
+  }, 1000);
+}
+
+function drawSkeleton(kp) {
+  const edges = [["left_shoulder", "left_hip"], ["left_hip", "left_knee"], ["left_knee", "left_ankle"]];
+  const points = ["left_shoulder", "left_hip", "left_knee", "left_ankle"];
+
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = "lime";
+  ctx.fillStyle = "lime";
+
+  for (const [a, b] of edges) {
+    if (kp[a] && kp[b] && kp[a].score > 0.5 && kp[b].score > 0.5) {
+      ctx.beginPath();
+      ctx.moveTo(kp[a].x, kp[a].y);
+      ctx.lineTo(kp[b].x, kp[b].y);
+      ctx.stroke();
+    }
+  }
+  for (const p of points) {
+    if (kp[p] && kp[p].score > 0.5) {
+      ctx.beginPath();
+      ctx.arc(kp[p].x, kp[p].y, 8, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+  }
+}
+
+function drawAngleDisplay(x, y, angle, label) {
+  if (angle === null) return;
+  ctx.save();
+  ctx.fillStyle = '#ffff00';
+  ctx.strokeStyle = '#ffff00';
+  ctx.lineWidth = 2;
+  ctx.fillRect(x - 35, y - 20, 70, 30);
+  ctx.strokeRect(x - 35, y - 20, 70, 30);
+  ctx.fillStyle = 'black';
+  ctx.font = 'bold 14px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${label}: ${Math.round(angle)}°`, x, y - 5);
+  ctx.restore();
+}
+
+function checkUSCSquatForm(kp) {
+  if (!kp.left_shoulder || !kp.left_hip || !kp.left_knee || !kp.left_ankle) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawSkeleton(kp);
+
+  let errors = [];
+  let currentHint = "";
+  let isFormCorrect = true;
+
+  const kneeFlexionAngle = getKneeFlexionAngle(kp.left_hip, kp.left_knee, kp.left_ankle);
+  const trunkTibiaAngle = getTrunkTibiaAngle(kp.left_shoulder, kp.left_hip, kp.left_knee, kp.left_ankle);
+
+  if (kneeFlexionAngle !== null) {
+    drawAngleDisplay(kp.left_knee.x + 50, kp.left_knee.y, kneeFlexionAngle, "Knee Flexion");
+    showDepthIndicator(kneeFlexionAngle);
+
+    if (kneeFlexionAngle < uscSquatStandards.optimalDepthMin) {
+      errors.push("Squat deeper - reach medium depth");
+      currentHint = `SQUAT DEEPER<br>Current: ${Math.round(kneeFlexionAngle)}°<br>Target: 90-110°`;
+      isFormCorrect = false;
+      beep();
+    } else if (kneeFlexionAngle > uscSquatStandards.optimalDepthMax && kneeFlexionAngle <= uscSquatStandards.deepDepthMax) {
+      errors.push("Deep squat detected - use caution");
+      currentHint = `DEEP SQUAT<br>Current: ${Math.round(kneeFlexionAngle)}°<br>Consider stopping at 110° for safety`;
+    } else if (kneeFlexionAngle > uscSquatStandards.deepDepthMax) {
+      errors.push("Too deep - rise up immediately");
+      currentHint = `TOO DEEP - STOP<br>Current: ${Math.round(kneeFlexionAngle)}°<br>Rise to 90-110° range`;
+      isFormCorrect = false;
+      beep();
+    }
+  }
+
+  if (trunkTibiaAngle !== null) {
+    drawAngleDisplay(kp.left_hip.x - 60, kp.left_hip.y, trunkTibiaAngle, "T-T");
+
+    if (trunkTibiaAngle > uscSquatStandards.hipBiasAngle) {
+      errors.push("Trunk too forward - stand more upright");
+      if (!currentHint) {
+        currentHint = `TRUNK TOO FORWARD<br>Trunk-Tibia: ${Math.round(trunkTibiaAngle)}°`;
+        isFormCorrect = false;
+        beep();
+      }
+    } else if (trunkTibiaAngle < uscSquatStandards.kneeBiasAngle) {
+      errors.push("Knees too forward - lean trunk slightly forward");
+      if (!currentHint) {
+        currentHint = `KNEES TOO FORWARD<br>Trunk-Tibia: ${Math.round(trunkTibiaAngle)}°`;
+        isFormCorrect = false;
+        beep();
+      }
+    }
+  }
+
+  if (!isFormCorrect) {
+    drawRedSquatLine(kp);
+  }
+
+  if (currentHint && currentHint !== feedbackText.innerHTML) {
+    showHint(currentHint);
+  }
+
+  let statusText = isFormCorrect ? "\n\n✅ EXCELLENT FORM!" : "\n\n⚠️ Form Corrections:";
+  if (errors.length > 0) {
+    statusText += "\n• " + errors.join("\n• ");
+  }
+
+  instructionText.textContent = instructionsForSquat + statusText;
+}
+
+function drawRedSquatLine(kp) {
+  const edges = [["left_shoulder", "left_hip"], ["left_hip", "left_knee"], ["left_knee", "left_ankle"]];
+  const points = ["left_shoulder", "left_hip", "left_knee", "left_ankle"];
+
+  ctx.lineWidth = 7;
+  ctx.strokeStyle = "red";
+  ctx.fillStyle = "red";
+
+  for (const [a, b] of edges) {
+    if (kp[a] && kp[b] && kp[a].score > 0.5 && kp[b].score > 0.5) {
+      ctx.beginPath();
+      ctx.moveTo(kp[a].x, kp[a].y);
+      ctx.lineTo(kp[b].x, kp[b].y);
+      ctx.stroke();
+    }
+  }
+  for (const p of points) {
+    if (kp[p] && kp[p].score > 0.5) {
+      ctx.beginPath();
+      ctx.arc(kp[p].x, kp[p].y, 10, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+  }
+}
+
+async function startDetection() {
+  await setupCamera();
+  video.play();
+  detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, {
+    modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
+  });
+  running = true;
+  detectPose();
+  startBtn.textContent = "Stop Exercise";
+}
+
+function stopDetection() {
+  running = false;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  feedbackText.innerHTML = "";
+  depthIndicator.style.display = "none";
+  if (videoStream) {
+    videoStream.getTracks().forEach(track => track.stop());
+    videoStream = null;
+  }
+  startBtn.textContent = "Start Exercise";
+}
+
+async function detectPose() {
+  if (!running) return;
+  const poses = await detector.estimatePoses(video);
+  if (poses.length > 0) {
+    const kp = poses[0].keypoints.reduce((acc, k) => { acc[k.name] = k; return acc; }, {});
+    checkUSCSquatForm(kp);
+  }
+  requestAnimationFrame(detectPose);
+}
+
+const instructionsForSquat = `Exercise: SQUAT (USC Biomechanics Standards)
+➡ Stand sideways to camera (left side visible)
+➡ Feet 100-150% shoulder width apart, toes ~30° outward
+➡ Target: Medium depth (90-110° knee flexion)
+➡ Maintain neutral spine throughout movement
+➡ Device: Place camera at hip height ~3-5 feet from you`;
+
+startBtn.addEventListener("click", () => {
+  if (running) {
+    stopDetection();
+  } else {
+    exerciseSelect.value = "squat"; // fixed exercise for this version
+    init();
+  }
+});
+</script>
+</body>
+</html>

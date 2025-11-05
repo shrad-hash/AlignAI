@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>About AlignAI</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap");
+      body {
+        margin: 0;
+        font-family: "Inter", Arial, sans-serif;
+        background: #051221;
+        color: #e2ffff;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+      header {
+        background: #10222b;
+        box-shadow: 0 2px 12px #24e6ea22;
+        position: sticky;
+        top: 0;
+        z-index: 3;
+      }
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 28px 54px 20px 54px;
+      }
+      .logo {
+        font-size: 2.1rem;
+        font-weight: bold;
+        color: #e2ffff;
+        text-shadow: 0 0 16px #24e6ea88;
+        letter-spacing: 0.6px;
+      }
+      .nav-links {
+        display: flex;
+        gap: 34px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .nav-links a {
+        color: #e2ffff;
+        text-decoration: none;
+        font-size: 1.1rem;
+        font-weight: 500;
+        transition: color 0.18s;
+        border-bottom: 2px solid transparent;
+        padding-bottom: 3px;
+      }
+      .nav-links a.active,
+      .nav-links a:hover {
+        color: #24e6ea;
+        border-bottom: 2px solid #24e6ea;
+      }
+      .about-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 60px;
+      }
+      .about-title {
+        font-size: 3.2rem;
+        color: #e2ffff;
+        font-weight: bold;
+        margin-bottom: 0.15em;
+        letter-spacing: 0.5px;
+        text-shadow: 0 0 18px #24e6ea80;
+        text-align: center;
+      }
+      .about-subtitle {
+        font-size: 1.32rem;
+        color: #b0cedb;
+        font-weight: 400;
+        margin-bottom: 40px;
+        text-align: center;
+      }
+      .about-content-row {
+        display: flex;
+        justify-content: center;
+        gap: 58px;
+        max-width: 1190px;
+        width: 97vw;
+      }
+      .about-image-container {
+        background: radial-gradient(circle at center 110%, #10222b 77%, #24e6ea22 100%);
+        border-radius: 24px;
+        box-shadow: 0 0 64px #24e6ea44, 0 3px 35px #0fffcf1e;
+        padding: 26px 18px 22px 18px;
+        min-width: 340px;
+        min-height: 420px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 18px;
+      }
+      .about-image-container img {
+        width: 320px;
+        height: auto;
+        aspect-ratio: 1/1.43;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 0 55px #24e6ea99;
+        display: block;
+        filter: drop-shadow(0 0 30px #24e6ea66);
+        animation: runner-glow 2.5s ease-in-out infinite alternate;
+      }
+      @keyframes runner-glow {
+        0% { filter: drop-shadow(0 0 16px #24e6ea50); }
+        100% { filter: drop-shadow(0 0 40px #24e6ea); }
+      }
+      .about-text {
+        max-width: 650px;
+        min-width: 292px;
+        line-height: 1.62;
+        font-size: 1.11rem;
+        color: #e2ffff;
+      }
+      .about-text p {
+        margin-bottom: 1.5em;
+        margin-top: 0;
+        opacity: 0.98;
+      }
+      .about-text p.highlight {
+        color: #24e6ea;
+        font-weight: 600;
+        margin-top: 1.5em;
+        margin-bottom: 0;
+        background: none;
+        text-shadow: 0 0 12px #24e6ea55;
+      }
+      @media (max-width: 1100px) {
+        .about-content-row {
+          flex-direction: column;
+          align-items: center;
+          gap: 38px;
+        }
+        .about-image-container {
+          margin-bottom: 2em;
+        }
+      }
+      @media (max-width: 700px) {
+        .navbar {
+          flex-direction: column;
+          gap: 13px;
+          padding: 13px 4vw 13px 4vw;
+        }
+        .about-content-row {
+          gap: 16px;
+        }
+        .about-title {
+          font-size: 2.1rem;
+        }
+        .about-image-container {
+          min-width: 0;
+          max-width: 88vw;
+          padding-right: 0;
+          padding-left: 0;
+        }
+        .about-image-container img {
+          width: 97vw;
+          max-width: 330px;
+        }
+        .about-text {
+          padding-left: 2vw;
+          padding-right: 2vw;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="navbar">
+        <span class="logo">AlignAI</span>
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="features.html">Features</a>
+          <a href="exercises.html">Exercises</a>
+          <a href="detection.html">Detection</a>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="about.html" class="active">About</a>
+        </nav>
+      </div>
+    </header>
+    <section class="about-section">
+      <div class="about-title">About AlignAI</div>
+      <div class="about-subtitle">
+        Combining medical expertise with cutting-edge AI technology
+      </div>
+      <div class="about-content-row">
+        <div class="about-image-container">
+          <img
+            src="image.jpg"
+            alt="Futuristic AI Body Visualization"
+          />
+        </div>
+        <div class="about-text">
+          <p>
+            AlignAI is an AI-driven fitness assistant designed to provide
+            real-time posture correction and performance feedback for gym users.
+            Using live telecast from the user's device camera, the app employs
+            advanced computer vision techniques to detect body keypoints,
+            calculate joint angles, and analyze overall movement patterns. When
+            incorrect posture or form deviations are detected, the system
+            instantly alerts the user through a beep sound and visual
+            indicators, highlighting the exact body region that requires
+            adjustment.
+          </p>
+          <p>
+            To ensure medically accurate guidance, the app is supported by a
+            curated database of exercise images and demonstration videos
+            certified by orthopedic specialists and physiotherapists. This
+            database serves as the benchmark for correct posture, enabling the
+            system to not only detect errors but also guide the user toward safe
+            and effective exercise execution.
+          </p>
+          <p>
+            In addition, the application provides a personalized user dashboard
+            where individuals can view their live session analytics, exercise
+            history, posture correction reports, and improvement trends over
+            time. The integration of audio-visual feedback ensures a seamless
+            experience, allowing users to simultaneously listen to their own
+            workout music while receiving corrective guidance.
+          </p>
+          <p> 
+            By combining the expertise of medical professionals with
+            cutting-edge AI, this application aims to reduce injury risks,
+            enhance workout efficiency, and make posture correction accessible
+            to gym-goers.
+          </p>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

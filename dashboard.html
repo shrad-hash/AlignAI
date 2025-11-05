@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>AlignAI – Dashboard</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@700;500&display=swap");
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Inter", Arial, sans-serif;
+        background: #051221;
+        color: #e2ffff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        background: #10222b;
+        box-shadow: 0 2px 10px #24e6ea22;
+        position: sticky;
+        top: 0;
+        z-index: 3;
+      }
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 48px 16px 48px;
+      }
+      .logo {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #24e6ea;
+        letter-spacing: 0.5px;
+        text-shadow: 0 0 14px #24e6ea55;
+      }
+      .nav-links {
+        display: flex;
+        gap: 32px;
+      }
+      .nav-links a {
+        color: #e2ffff;
+        text-decoration: none;
+        font-size: 1.08rem;
+        font-weight: 500;
+        padding-bottom: 2px;
+        transition: color 0.17s;
+        border-bottom: 2px solid transparent;
+      }
+      .nav-links a.active,
+      .nav-links a:hover {
+        color: #24e6ea;
+        border-bottom: 2px solid #24e6ea;
+        font-weight: bold;
+      }
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        width: 100vw;
+        margin: 0;
+        padding: 0;
+      }
+      .tabs-container {
+        display: flex;
+        margin-top: 38px;
+        margin-left: 84px;
+        gap: 14px;
+      }
+      .tab-btn {
+        font-family: "Inter", Arial, sans-serif;
+        font-size: 1.08rem;
+        font-weight: 500;
+        border-radius: 13px;
+        padding: 16px 32px;
+        outline: none;
+        border: none;
+        background: #10222b;
+        color: #e2ffff;
+        cursor: pointer;
+        transition: all 0.18s;
+        margin-right: 3px;
+        margin-bottom: 5px;
+        text-decoration: none;
+        display: inline-block;
+        position: relative;
+        box-shadow: 0 0 12px #24e6ea10;
+      }
+      .tab-btn.active {
+        background: #24e6ea;
+        color: #001920;
+        box-shadow: 0 0 22px #24e6ea77;
+        font-weight: 700;
+      }
+      .tab-btn:not(.active):hover {
+        background: #153042;
+        color: #24e6ea;
+      }
+      /* EXERCISE HISTORY CARD */
+      .card-list-container,
+      .report-list-container {
+        margin-top: 18px;
+        margin-left: 64px;
+        margin-bottom: 80px;
+        min-width: 85vw;
+        max-width: 1400px;
+        border-radius: 14px;
+        background: transparent;
+        box-shadow: none;
+      }
+      .history-card-list,
+      .report-card-list {
+        background: #10222b;
+        border: 2px solid #24e6ea70;
+        border-radius: 18px;
+        box-shadow: 0 3px 24px #24e6ea22, 0 1.5px 13px #0002;
+        overflow: hidden;
+        width: 100%;
+      }
+      .history-row,
+      .report-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 25px 44px;
+        border-bottom: 1px solid #188c93;
+        transition: background 0.12s;
+      }
+      .history-row:last-child,
+      .report-row:last-child {
+        border-bottom: none;
+      }
+      .hist-title,
+      .report-title {
+        color: #24e6ea;
+        font-size: 1.18rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+        letter-spacing: 0.01rem;
+      }
+      .hist-date {
+        color: #b0cedb;
+        font-size: 1.01rem;
+        font-weight: 400;
+      }
+      .history-stats {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        font-size: 1.06rem;
+      }
+      .hist-duration {
+        color: #e2ffff;
+        font-weight: 600;
+      }
+      .hist-label {
+        color: #b0ffd8;
+        font-weight: 400;
+      }
+      .hist-accuracy {
+        color: #24e6ea;
+        font-weight: 700;
+        font-size: 1.06rem;
+        margin-left: 8px;
+        text-decoration: none;
+      }
+      .report-section {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .report-status {
+        color: #b0cedb;
+        font-size: 1.04rem;
+        font-weight: 400;
+      }
+      .report-improvement {
+        color: #49ff6a;
+        font-weight: 700;
+        font-size: 1.11rem;
+        text-decoration: none;
+      }
+      .report-label {
+        color: #b0ffd8;
+        font-weight: 400;
+        margin-right: 8px;
+        font-size: 1.08rem;
+      }
+      /* Footer styles */
+      footer {
+        background: #10222b;
+        border-top: 2px solid #24e6ea70;
+        width: 100vw;
+        padding-top: 36px;
+        padding-bottom: 28px;
+        margin-top: auto;
+        box-sizing: border-box;
+      }
+      .footer-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        max-width: 1350px;
+        margin: auto;
+        padding: 0 64px;
+      }
+      .footer-logo {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #24e6ea;
+        text-shadow: 0 0 10px #24e6ea80;
+        letter-spacing: 0.3px;
+        margin-bottom: 8px;
+      }
+      .footer-copyright {
+        font-size: 1rem;
+        color: #b0cedb;
+        margin-bottom: 9px;
+      }
+      .footer-social {
+        display: flex;
+        gap: 17px;
+      }
+      .footer-social-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        border: none;
+        background: rgba(36, 230, 234, 0.09);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #24e6ea;
+        font-size: 1.15rem;
+        cursor: pointer;
+        transition: background 0.13s, color 0.13s;
+      }
+      .footer-social-icon:hover {
+        background: #24e6ea;
+        color: #101315;
+        box-shadow: 0 0 20px #24e6ea;
+      }
+      /* RESPONSIVE */
+      @media (max-width: 900px) {
+        .navbar {
+          flex-direction: column;
+          gap: 10px;
+          padding-left: 4vw;
+          padding-right: 4vw;
+        }
+        .tabs-container,
+        .card-list-container,
+        .report-list-container,
+        .footer-container {
+          margin-left: 2vw;
+          margin-right: 2vw;
+          padding-left: 0;
+          padding-right: 0;
+        }
+        .footer-container {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 18px;
+        }
+        .history-row,
+        .report-row {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
+          padding: 15px 12px;
+        }
+      }
+      @media (max-width: 600px) {
+        .tabs-container,
+        .card-list-container,
+        .report-list-container {
+          margin-left: 0;
+          min-width: 98vw;
+        }
+        .footer-container {
+          padding: 0 11px;
+        }
+        .footer-logo {
+          font-size: 1.15rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="navbar">
+        <span class="logo">AlignAI</span>
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="features.html">Features</a>
+          <a href="exercises.html">Exercises</a>
+          <a href="detection.html">Detection</a>
+          <a href="dashboard.html" class="active">Dashboard</a>
+          <a href="about.html">About</a>
+
+        </nav>
+      </div>
+    </header>
+    <main>
+      <div class="tabs-container">
+        <button
+          id="tab-exercise"
+          class="tab-btn active"
+          onclick="showTab('exercise')"
+        >
+          Exercise History
+        </button>
+        <button id="tab-posture" class="tab-btn" onclick="showTab('posture')">
+          Posture Reports
+        </button>
+      </div>
+      <!-- Exercise history view -->
+      <div id="exercise-content" class="card-list-container">
+        <div class="history-card-list">
+          <div class="history-row">
+            <div class="history-exercise">
+              <div class="hist-title">Squat</div>
+              <div class="hist-date">2025-01-20</div>
+            </div>
+            <div class="history-stats">
+              <span class="hist-label">Duration:</span>
+              <span class="hist-duration">15 min</span>
+              <span class="hist-label">Accuracy:</span>
+              <span class="hist-accuracy">92%</span>
+            </div>
+          </div>
+          <div class="history-row">
+            <div class="history-exercise">
+              <div class="hist-title">Push-Up</div>
+              <div class="hist-date">2025-01-19</div>
+            </div>
+            <div class="history-stats">
+              <span class="hist-label">Duration:</span>
+              <span class="hist-duration">12 min</span>
+              <span class="hist-label">Accuracy:</span>
+              <span class="hist-accuracy">88%</span>
+            </div>
+          </div>
+          <div class="history-row">
+            <div class="history-exercise">
+              <div class="hist-title">Lunge</div>
+              <div class="hist-date">2025-01-18</div>
+            </div>
+            <div class="history-stats">
+              <span class="hist-label">Duration:</span>
+              <span class="hist-duration">10 min</span>
+              <span class="hist-label">Accuracy:</span>
+              <span class="hist-accuracy">85%</span>
+            </div>
+          </div>
+          <div class="history-row">
+            <div class="history-exercise">
+              <div class="hist-title">Plank</div>
+              <div class="hist-date">2025-01-17</div>
+            </div>
+            <div class="history-stats">
+              <span class="hist-label">Duration:</span>
+              <span class="hist-duration">8 min</span>
+              <span class="hist-label">Accuracy:</span>
+              <span class="hist-accuracy">90%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Posture reports view -->
+      <div
+        id="posture-content"
+        class="report-list-container"
+        style="display: none"
+      >
+        <div class="report-card-list">
+          <div class="report-row">
+            <div class="report-section">
+              <div class="report-title">Knee Alignment</div>
+              <div class="report-status">Status: Good</div>
+            </div>
+            <div class="report-label">
+              Improvement: <span class="report-improvement">+5%</span>
+            </div>
+          </div>
+          <div class="report-row">
+            <div class="report-section">
+              <div class="report-title">Hip Position</div>
+              <div class="report-status">Status: Fair</div>
+            </div>
+            <div class="report-label">
+              Improvement: <span class="report-improvement">+8%</span>
+            </div>
+          </div>
+          <div class="report-row">
+            <div class="report-section">
+              <div class="report-title">Shoulder Stability</div>
+              <div class="report-status">Status: Excellent</div>
+            </div>
+            <div class="report-label">
+              Improvement: <span class="report-improvement">+12%</span>
+            </div>
+          </div>
+          <div class="report-row">
+            <div class="report-section">
+              <div class="report-title">Core Engagement</div>
+              <div class="report-status">Status: Good</div>
+            </div>
+            <div class="report-label">
+              Improvement: <span class="report-improvement">+7%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <div class="footer-container">
+        <div>
+          <div class="footer-logo">AlignAI</div>
+          <div class="footer-copyright">
+            ©️ 2025 AlignAI. All Rights Reserved.
+          </div>
+        </div>
+        <div class="footer-social">
+          <!-- Social icons here -->
+        </div>
+      </div>
+    </footer>
+    <script>
+      function showTab(tab) {
+        var exercise = document.getElementById("exercise-content");
+        var posture = document.getElementById("posture-content");
+        var exTab = document.getElementById("tab-exercise");
+        var poTab = document.getElementById("tab-posture");
+        if (tab === "exercise") {
+          exercise.style.display = "";
+          posture.style.display = "none";
+          exTab.classList.add("active");
+          poTab.classList.remove("active");
+        } else {
+          exercise.style.display = "none";
+          posture.style.display = "";
+          exTab.classList.remove("active");
+          poTab.classList.add("active");
+        }
+      }
+    </script>
+  </body>
+</html>
