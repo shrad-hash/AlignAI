@@ -1,10 +1,10 @@
-🧠 AlignAI (GymGenius)
+AlignAI (by GymGenius)
 
 Real-Time AI Fitness & Posture Correction Assistant
 
 AlignAI is a browser-based AI fitness app that provides instant posture correction during workouts using real-time pose estimation and biomechanics-based feedback — no sensors, wearables, or backend required.
 
-⚡ Features
+Features
 
 AI Pose Detection: Real-time keypoint tracking using TensorFlow.js MoveNet / MediaPipe BlazePose.
 
@@ -18,7 +18,7 @@ Privacy by Design: Entirely client-side — no data leaves your browser.
 
 One-Click Setup: Just open, allow camera access, and start moving.
 
-🧬 Scientific Basis
+Scientific Basis
 
 Grounded in Exercise Science: Joint angle thresholds and feedback derived from sports biomechanics and physiotherapy research.
 
@@ -26,7 +26,7 @@ Clinically Validated Demos: Certified physiotherapist-approved reference videos 
 
 Data Sources: COCO Keypoints, InfiniteForm, Fitness-AQA datasets.
 
-🛠️ Tech Stack
+Tech Stack
 
 Frontend:
 
@@ -48,7 +48,7 @@ MongoDB for user data & progress tracking
 
 PWA version for offline workouts
 
-🎨 UI/UX Highlights
+UI/UX Highlights
 
 Color-coded Joints: Green = correct, Red = incorrect.
 
@@ -58,7 +58,7 @@ End-of-Session Card: Displays accuracy metrics and improvement suggestions.
 
 Demo Comparison Mode: Watch expert form beside your real-time posture.
 
-📖 Usage
+Usage
 
 Clone repo & open index.html in browser.
 
@@ -70,7 +70,7 @@ Perform movement — app gives instant feedback.
 
 End session to view analytics summary.
 
-🧠 Future Roadmap
+Future Roadmap
 
 Voice-based coaching assistant
 
@@ -80,7 +80,7 @@ Cloud sync for progress tracking
 
 Mobile-native (TensorFlow Lite) integration
 
-📚 References
+References
 
 TensorFlow.js MoveNet Docs
 
